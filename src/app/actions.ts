@@ -48,7 +48,9 @@ export async function generateBrandingGuide({
           .describe("The font family of the branding guide"),
       }),
     }),
-    prompt: `Generate a branding guide for ${description}`,
+    prompt: `Generate a branding guide for ${description}. Ensure to take one of the allowed icons: ${availableIcons.join(
+      ", "
+    )}`,
   });
 
   return object.brandingGuide;
