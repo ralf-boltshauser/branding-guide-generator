@@ -24,7 +24,7 @@ export async function generateBrandingGuide({
         accentColor: z
           .string()
           .describe(
-            "A differently shaded version of the primary color (a little darker or brighter, or less saturation)."
+            "A differently shaded version of the primary color (a little darker or brighter, or less saturation). Ensure it is similar to the primary color."
           ),
         icon: z.object({
           icon: z.enum(availableIcons),
