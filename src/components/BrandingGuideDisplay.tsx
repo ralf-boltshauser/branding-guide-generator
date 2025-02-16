@@ -50,6 +50,7 @@ export default function BrandingGuideDisplay({
   const defaultIcon =
     "https://0gdvtnvfey.ufs.sh/f/jIVaTjix9anHtvsgFleUutKlNAoOpySP19jfXEJQH3CkGbrh";
   const guideRef = useRef<HTMLDivElement>(null);
+  const guideRefWithoutGradient = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
 
   // Load the font if it's a web font
@@ -90,9 +91,46 @@ export default function BrandingGuideDisplay({
         fontEmbedCSS: "",
         skipFonts: true,
         style: {
+          padding: "0",
+          margin: "0",
+        },
+      });
+
+      const link = document.createElement("a");
+      link.download = `${guide.name
+        .toLowerCase()
+        .replace(/\s+/g, "-")}-branding-guide.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error("Failed to export branding guide:", err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportWithoutGradient = async () => {
+    if (!guideRefWithoutGradient.current) return;
+
+    try {
+      setIsExporting(true);
+      const dataUrl = await toPng(guideRefWithoutGradient.current, {
+        quality: 1.0,
+        pixelRatio: 2,
+        filter: (node) => {
+          if (
+            node.tagName === "LINK" &&
+            node.getAttribute("rel") === "stylesheet"
+          ) {
+            return false;
+          }
+          return true;
+        },
+        fontEmbedCSS: "",
+        skipFonts: true,
+        style: {
           padding: "3rem",
           margin: "0",
-          background: "white",
         },
       });
 
@@ -130,135 +168,166 @@ export default function BrandingGuideDisplay({
       }}
     >
       <div
+        className=" bg-white/90 backdrop-blur-sm rounded-lg w-fit mx-auto p-0"
         ref={guideRef}
-        className="max-w-4xl mx-auto p-8 sm:p-12 bg-white/90 backdrop-blur-sm rounded-lg shadow-2xl"
-        style={{
-          backgroundColor: "rgba(255, 255, 255, 0.92)",
-          padding: "3rem",
-          maxWidth: "56rem",
-          margin: "3rem auto",
-          width: "100%",
-          boxSizing: "border-box",
-          overflow: "hidden",
-        }}
       >
         <div
-          className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-0 mb-8"
-          style={{ marginBottom: "2rem" }}
-        >
-          <div className="w-16 h-16 sm:mr-4 relative">
-            <img
-              src={uploadedIcon || defaultIcon}
-              alt="Brand Icon"
-              className="object-contain rounded-lg"
-              style={{
-                objectFit: "contain",
-                borderRadius: "0.5rem",
-              }}
-            />
-          </div>
-          <div className="text-center sm:text-left">
-            <h1
-              style={{
-                fontFamily,
-                fontSize: "2.25rem",
-                lineHeight: "2.5rem",
-                fontWeight: 700,
-                margin: 0,
-              }}
-              className="text-3xl sm:text-4xl font-bold"
-            >
-              {guide.name || "Your Brand Name"}
-            </h1>
-            <p
-              className="text-gray-600 mt-2"
-              style={{
-                marginTop: "0.5rem",
-                color: "rgb(75, 85, 99)",
-                margin: "0.5rem 0 0 0",
-              }}
-            >
-              {guide.tagline || "Your brand tagline goes here"}
-            </p>
-          </div>
-        </div>
-
-        <div
-          className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8"
+          className="max-w-4xl mx-auto rounded-lg p-12"
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-            gap: "1.5rem",
-            marginTop: "2rem",
-            marginBottom: "2rem",
+            background: `
+            radial-gradient(circle at 0% 0%, ${guide.primaryColor}30 0%, transparent 50%),
+            radial-gradient(circle at 100% 0%, ${guide.secondaryColor}30 0%, transparent 50%),
+            radial-gradient(circle at 100% 100%, ${guide.accentColor}30 0%, transparent 50%),
+            radial-gradient(circle at 0% 100%, ${guide.secondaryColor}30 0%, transparent 50%),
+            linear-gradient(135deg, 
+              ${guide.primaryColor}20 0%, 
+              ${guide.secondaryColor}25 25%, 
+              ${guide.accentColor}20 50%, 
+              ${guide.secondaryColor}25 75%, 
+              ${guide.primaryColor}20 100%
+            )
+          `,
           }}
         >
-          <ColorDisplay color={guide.primaryColor} label="Primary Color" />
-          <ColorDisplay color={guide.secondaryColor} label="Secondary Color" />
-          <ColorDisplay color={guide.accentColor} label="Accent Color" />
-        </div>
-
-        <div style={{ marginTop: "2rem" }}>
-          <h3 className="font-medium mb-2" style={{ marginBottom: "0.5rem" }}>
-            Typography
-          </h3>
-          <p
+          <div
+            ref={guideRefWithoutGradient}
+            className="p-8 sm:p-12 bg-white/90 backdrop-blur-sm rounded-lg shadow-xl"
             style={{
-              fontFamily,
-              fontSize: "1.5rem",
-              lineHeight: "2rem",
-              margin: "0 0 1rem 0",
+              backgroundColor: "rgba(255, 255, 255, 0.92)",
+              maxWidth: "56rem",
+              margin: "0 auto",
+              width: "100%",
+              boxSizing: "border-box",
+              overflow: "hidden",
             }}
-            className="text-xl sm:text-2xl"
           >
-            {guide.fontFamily}
-          </p>
-          <div className="space-y-2" style={{ marginTop: "1rem" }}>
-            <p
-              style={{
-                fontFamily,
-                fontSize: "2.25rem",
-                lineHeight: "2.5rem",
-                margin: "0 0 0.5rem 0",
-                // truncate text
-                textOverflow: "ellipsis",
-                overflow: "hidden",
-                whiteSpace: "nowrap",
-              }}
-              className=" md:text-4xl whitespace-nowrap"
+            <div
+              className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-0 mb-8"
+              style={{ marginBottom: "2rem" }}
             >
-              ABCDEFGHIJKLMNOPQRSTUVWXYZ
-            </p>
-            <p
+              <div className="w-16 h-16 sm:mr-4 relative">
+                <img
+                  src={uploadedIcon || defaultIcon}
+                  alt="Brand Icon"
+                  className="object-contain rounded-lg"
+                  style={{
+                    objectFit: "contain",
+                    borderRadius: "0.5rem",
+                  }}
+                />
+              </div>
+              <div className="text-center sm:text-left">
+                <h1
+                  style={{
+                    fontFamily,
+                    fontSize: "2.25rem",
+                    whiteSpace: "nowrap",
+                    lineHeight: "2.5rem",
+                    fontWeight: 700,
+                    margin: 0,
+                  }}
+                  className="text-3xl sm:text-4xl font-bold"
+                >
+                  {guide.name || "Your Brand Name"}
+                </h1>
+                <p
+                  className="text-gray-600 mt-2"
+                  style={{
+                    marginTop: "0.5rem",
+                    color: "rgb(75, 85, 99)",
+                    margin: "0.5rem 0 0 0",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {guide.tagline || "Your brand tagline goes here"}
+                </p>
+              </div>
+            </div>
+
+            <div
+              className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8"
               style={{
-                fontFamily,
-                fontSize: "2.25rem",
-                lineHeight: "2.5rem",
-                whiteSpace: "nowrap",
-                margin: "0 0 0.5rem 0",
-                textOverflow: "ellipsis",
-                overflow: "hidden",
+                display: "grid",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                gap: "1.5rem",
+                marginTop: "2rem",
+                marginBottom: "2rem",
               }}
-              className="text-2xl sm:text-4xl whitespace-nowrap"
             >
-              abcdefghijklmnopqrstuvwxyz
-            </p>
-            <p
-              style={{
-                fontFamily,
-                fontSize: "2.25rem",
-                lineHeight: "2.5rem",
-                whiteSpace: "nowrap",
-                margin: "0",
-              }}
-              className="text-2xl sm:text-4xl whitespace-nowrap"
-            >
-              0123456789
-            </p>
+              <ColorDisplay color={guide.primaryColor} label="Primary Color" />
+              <ColorDisplay
+                color={guide.secondaryColor}
+                label="Secondary Color"
+              />
+              <ColorDisplay color={guide.accentColor} label="Accent Color" />
+            </div>
+
+            <div style={{ marginTop: "2rem" }}>
+              <h3
+                className="font-medium mb-2"
+                style={{ marginBottom: "0.5rem" }}
+              >
+                Typography
+              </h3>
+              <p
+                style={{
+                  fontFamily,
+                  fontSize: "1.5rem",
+                  lineHeight: "2rem",
+                  margin: "0 0 1rem 0",
+                }}
+                className="text-xl sm:text-2xl"
+              >
+                {guide.fontFamily}
+              </p>
+              <div className="space-y-2" style={{ marginTop: "1rem" }}>
+                <p
+                  style={{
+                    fontFamily,
+                    fontSize: "2.25rem",
+                    lineHeight: "2.5rem",
+                    margin: "0 0 0.5rem 0",
+                    // truncate text
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                  }}
+                  className=" md:text-4xl whitespace-nowrap"
+                >
+                  ABCDEFGHIJKLMNOPQRSTUVWXYZ
+                </p>
+                <p
+                  style={{
+                    fontFamily,
+                    fontSize: "2.25rem",
+                    lineHeight: "2.5rem",
+                    whiteSpace: "nowrap",
+                    margin: "0 0 0.5rem 0",
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                  }}
+                  className="text-2xl sm:text-4xl whitespace-nowrap"
+                >
+                  abcdefghijklmnopqrstuvwxyz
+                </p>
+                <p
+                  style={{
+                    fontFamily,
+                    fontSize: "2.25rem",
+                    lineHeight: "2.5rem",
+                    whiteSpace: "nowrap",
+                    margin: "0",
+                  }}
+                  className="text-2xl sm:text-4xl whitespace-nowrap"
+                >
+                  0123456789
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div className="max-w-4xl mx-auto flex justify-end">
+      <div className="max-w-4xl mx-auto flex flex-row justify-end gap-4 mt-4">
         <Button
           onClick={handleExport}
           disabled={isExporting}
@@ -270,6 +339,18 @@ export default function BrandingGuideDisplay({
           }}
         >
           {isExporting ? "Exporting..." : "Export as PNG"}
+        </Button>
+        <Button
+          onClick={handleExportWithoutGradient}
+          disabled={isExporting}
+          className="w-full sm:w-auto"
+          style={{
+            background: guide.primaryColor,
+            border: "none",
+            color: "white",
+          }}
+        >
+          {isExporting ? "Exporting..." : "Export without gradient"}
         </Button>
       </div>
     </div>

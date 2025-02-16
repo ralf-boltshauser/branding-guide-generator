@@ -24,10 +24,14 @@ export async function generateBrandingGuide({
         accentColor: z
           .string()
           .describe(
-            "A differently shaded version of the primary color (a little darker or brighter, or less saturation). Ensure it is similar to the primary color."
+            "A differently shaded version of the primary color (a little darker or brighter, or less saturation). Ensure it is similar to the primary color and not a whole different color."
           ),
         icon: z.object({
-          icon: z.enum(availableIcons),
+          icon: z
+            .enum(availableIcons)
+            .describe(
+              "The icon to use. Ensure it aligns with the description."
+            ),
           backgroundStartColor: z
             .string()
             .describe("The start color of the icon background with # prefix"),
@@ -50,7 +54,9 @@ export async function generateBrandingGuide({
     }),
     prompt: `Generate a branding guide for ${description}. Ensure to take one of the allowed icons: ${availableIcons.join(
       ", "
-    )}`,
+    )}
+    
+    Ensure primary and accent colors are really similar. Like two different shades of the same color. The secondary color should be different.`,
   });
 
   return object.brandingGuide;
