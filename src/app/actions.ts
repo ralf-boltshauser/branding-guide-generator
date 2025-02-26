@@ -28,9 +28,12 @@ export async function generateBrandingGuide({
           ),
         icon: z.object({
           icon: z
-            .enum(availableIcons)
-            .describe(
-              "The icon to use. Ensure it aligns with the description."
+            .string()
+            .describe("The icon to use. Ensure it aligns with the description.")
+            .transform((val) =>
+              availableIcons.includes(val as (typeof availableIcons)[number])
+                ? val
+                : "raycast-logo-neg"
             ),
           backgroundStartColor: z
             .string()
